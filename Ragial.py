@@ -1,7 +1,7 @@
 import sys, os
 import traceback
 import time #for sleep
-from Scrape import Scrape, Item, eprint
+from SimplePyScrape.Scrape import Scrape, Item, eprint
 import urllib
 import datetime
 try:
