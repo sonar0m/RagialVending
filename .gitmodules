@@ -1,0 +1,3 @@
+[submodule "SimplePyScrape"]
+	path = SimplePyScrape
+	url = https://github.com/sonar0m/SimplePyScrape.git
