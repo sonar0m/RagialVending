@@ -157,7 +157,7 @@ def getItemHistory(url, rowCount):
         if type(price) ==type(""):
             price = price.strip();
         item.append(name=name, date=date, price=price, active=active)
-    #print "{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date))
+    #print("{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date)))
     return item
 
 
@@ -239,7 +239,7 @@ def findItem(name, page=0, rowCount=16):
             eprint("Row" + str(r)+ str(data["set0|Set"]["Search" + str(r) + ""]))
         icon = data["Search" + str(r) + "|Icon"]["icon0"]
         item.append(name=name.strip(), url=url.strip(), icon=icon.strip())
-    # print "{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date))
+    # print("{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date)))
     return item
 
 '''
@@ -302,7 +302,9 @@ def searchName(name):
     #return url
     return ""
 
-
+'''
+Returns the configurations
+'''
 def getConfig():
     config = ConfigParser.ConfigParser()
     if "EXTERNAL_STORAGE" in os.environ:
@@ -315,13 +317,17 @@ def getConfig():
     config.read(cfg[cfgOS] + "settings.ini")
     return config
 
-
+'''
+returns blank Ragial Item
+'''
 def newRagialItem():
     config = getConfig()
     seperator = config.get("CSV", "seperator")
     return Item(seperator, "name", "name" + seperator + "date" + seperator + "price" + seperator + "active")
 
-
+'''
+get's and populates Ragila items
+'''
 def ragialItemPopulation(item, url, rowCount):
     i = getItemHistory(str(url), rowCount)
     #print("debug(ragialItemPopulation)"+str(i.itemDetails.keys()))
@@ -337,6 +343,9 @@ def ragialItemPopulation(item, url, rowCount):
         pass
     return item
 
+'''
+runs all of the history  for history for collected items
+'''
 def RunHistory(code, rowCount, pages):
     src = None
     itemsz = []
@@ -363,7 +372,9 @@ def RunHistory(code, rowCount, pages):
     # end for codes
     return itemsz
 
-
+'''
+Prints items to CSV
+'''
 def csvOutput(item):
     itemz = item
     if type(item) == type(newRagialItem()):

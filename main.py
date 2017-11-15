@@ -108,7 +108,7 @@ def run_RagialCart():
     print("".join(["-" for l in header]))
     print(header)
     print("".join(["=" for l in header]))
-    for z in zip(median.keys(), median.values(), aMedian.values(), aMin.values(), aCount.values()):
+    for z in zip(names, median.values(), aMedian.values(), aMin.values(), aCount.values()):
         line= (formatting).format(*z)
         print(line)
         print("".join(["-" for l in line]))
