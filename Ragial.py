@@ -1,4 +1,17 @@
-import sys, os
+#source
+#https://stackoverflow.com/questions/18812614/embedding-a-python-library-in-my-own-package
+import os#required for program aswell
+import sys#required for program aswell
+
+# Add vendor directory to module search path
+parent_dir = os.path.abspath(os.path.dirname(__file__))
+vendor_dir = parent_dir
+#vendor_dir = os.path.join(parent_dir, 'RagialVending')
+
+print(vendor_dir)
+sys.path.append(vendor_dir)
+#start of program
+
 import traceback
 import time #for sleep
 from SimplePyScrape.Scrape import Scrape, Item, eprint

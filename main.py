@@ -1,3 +1,14 @@
+#source
+#https://stackoverflow.com/questions/18812614/embedding-a-python-library-in-my-own-package
+import os
+import sys
+
+# Add vendor directory to module search path
+parent_dir = os.path.abspath(os.path.dirname(__file__))
+vendor_dir = os.path.join(parent_dir, 'RagialVending')
+
+sys.path.append(parent_dir)
+#start of program
 import Ragial
 import time #for sleep
 from os import listdir
