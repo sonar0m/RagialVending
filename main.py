@@ -19,10 +19,12 @@ except:
     import ConfigParser
 
 def getInputs():
-    ret = []
+    ret = {}
+    #configuration
     config= Ragial.getConfig()
     roDir = config.get("search","Ragnarok")
     tabName=config.get("search","ChatTabName")
+    #file work
     if roDir[-1]!="\\":
         roDir = roDir+"\\"
     file=""
@@ -30,6 +32,7 @@ def getInputs():
     stream=None
     tabfiles = [f for f in listdir(join(roDir, "Chat")) if isfile(join(join(roDir, "Chat"), f)) and "_"+tabName in f]
     tabfiles.sort()
+    #open files
     try:
             #Ragial.eprint(join(join(roDir, "Chat"), tabfiles[-1]) )
             stream = open(join(join(roDir, "Chat"), tabfiles[-1]) )
@@ -39,13 +42,17 @@ def getInputs():
     finally:
         if stream != None:
             stream.close()
+    ####
+    ##parse file
+    ####
     #Ragial.eprint(file)
     for line in file.split("\n"):
         if len(line)>0:
             #Ragial.eprint(line[::-1])
             lastindex = (line[::-1].index("( ")+2)*-1#remember it's revirsed
-            ret.append(line[8:lastindex])
-    return ret
+            ret[line[8:lastindex]] = 0
+    Ragial.eprint(ret.keys())
+    return ret.keys()
     
 def getCodes(names):
     ret = {}
