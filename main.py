@@ -28,14 +28,14 @@ def getInputs():
     if roDir[-1]!="\\":
         roDir = roDir+"\\"
     file=""
-    
+
     stream=None
     tabfiles = [f for f in listdir(join(roDir, "Chat")) if isfile(join(join(roDir, "Chat"), f)) and "_"+tabName in f]
     tabfiles.sort()
     #open files
     try:
             #Ragial.eprint(join(join(roDir, "Chat"), tabfiles[-1]) )
-            stream = open(join(join(roDir, "Chat"), tabfiles[-1]) )
+            stream = open(join(join(roDir, "Chat"), tabfiles[-1]) )#open the newest file and join it to the chat location in the config
             file = stream.read()
     except:
         Ragial.eprint("get RO file error")
@@ -49,11 +49,13 @@ def getInputs():
     for line in file.split("\n"):
         if len(line)>0:
             #Ragial.eprint(line[::-1])
+            #revirse look for the first ( incase it's double or tripple digitiet
             lastindex = (line[::-1].index("( ")+2)*-1#remember it's revirsed
-            ret[line[8:lastindex]] = 0
+            if line[:8]=="You got ":
+                ret[line[8:lastindex]] = 0 #8="You Got "
     Ragial.eprint(ret.keys())
     return ret.keys()
-    
+
 def getCodes(names):
     ret = {}
     for name in names:
@@ -67,7 +69,10 @@ def getHistory(codes):
     pages = config.getint("CSV", "pages")
     ret = Ragial.RunHistory(codes.values(), rowCount, pages)
     return ret
-
+############################
+#starting calculation get's#
+############################
+#calculat all median
 def getMedian(items):
     ret={}
     for item in items:
@@ -77,7 +82,7 @@ def getMedian(items):
             ret[item.itemDetails["name"]] = -1
         ret[item.itemDetails["name"]] = int(i[int(len(i)/2)])
     return ret
-    
+#calculat ACTIVE median
 def getActiveMedian(items):
     ret={}
     for item in items:
@@ -88,7 +93,7 @@ def getActiveMedian(items):
         else:
             ret[item.itemDetails["name"]] = -1
     return ret
-
+#calculate active minum
 def getActiveMinum(items):
     ret={}
     for item in items:
@@ -99,7 +104,7 @@ def getActiveMinum(items):
         else:
             ret[item.itemDetails["name"]] = -1
     return ret
-    
+#get the active count
 def getActiveCount(items):
     ret = {}
     for item in items:
@@ -108,17 +113,23 @@ def getActiveCount(items):
         ret[item.itemDetails['name']] = len(i)
     return ret
 
+
 def run_RagialCart():
+    #Inputs
     names = getInputs()#gets /savechat from configs
     codes = getCodes(names) # get's the codes from item names
+
+    #get info
     #Ragial.eprint("codes"+codes)
     history = getHistory(codes) #get the history info
+
+    #output calculate
     #insert check for 0 count and no returns
     median = getMedian(history)
     aMedian = getActiveMedian(history)
     aMin = getActiveMinum(history)
     aCount = getActiveCount(history)
-    
+
     ####output####
     formatting = "{:>50}|"+"{:^12}|"*4
     header = (formatting).format(*["item", "med", "A Med", "aMin", "aCount"])
@@ -131,6 +142,7 @@ def run_RagialCart():
         print(line)
         print("".join(["-" for l in line]))
 
+#checks if the file needs to be run
 def needsToRun():
     #check  if file was moved/ created
     config = Ragial.getConfig()
@@ -152,7 +164,8 @@ def needsToRun():
     #check if ran after last time
     run_RagialCart()
     #move or remove file?
-    
+
+#check's if the directory has a new file
 def isChanged(last):
     config= Ragial.getConfig()
     roDir = config.get("search","Ragnarok")
@@ -172,7 +185,7 @@ def isChanged(last):
 
 if __name__ == "__main__":
     needsToRun()# get's /savechants from configured locations then out put's in CSV
-    
+
     '''
     row_format ="{:>15}" * (len(median.keys()) + 1)
     print row_format.format("", *median.keys())
