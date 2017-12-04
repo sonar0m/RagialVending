@@ -35,14 +35,15 @@ except:
 
 lan = False
 Seperator = "|"
-'''
-## get the history of an item IE who sold when##
-## returns the rows of info of the scrapped output of the row count
-'''
+cashe = {} # cashe of names and link short hand
 def getItemHistory(url, rowCount):
+    """
+     get the history of an item IE who sold when
+     returns the rows of info of the scrapped output of the row count
+    """
     #eprint(url)
     # configurations
-######row data
+    ######row data
     urlflag = [1, "href=", "\""]
     urlflags = {"tyfe": "string", "name": "url", "cfg": {}, "flags": urlflag}
     nameflag = [1, "/>", "<"]
@@ -58,17 +59,17 @@ def getItemHistory(url, rowCount):
     itemsflags = {"type": "string",
                   "name": "row",
                   #"cfg": {"Urls":{"type": "string", "name": "url", "cfg": {}, "flags": [1,"", ""]}} ,
-                  "cfg": { "Name": nameflags, "Date": dateflags, "Price":priceflags},#"Urls":urlflags, 
+                  "cfg": { "Name": nameflags, "Date": dateflags, "Price":priceflags},#"Urls":urlflags,
                   "flags": itemsflag}
     ######end row tat
     ######start item and sat data
-    
+
     cfg = [1, "</tfoot>", "</div>"]
     cfgs = {"type": "string",
             "name": "set",
             #"cfg": {"Urls":{"type": "string", "name": "url", "cfg": {}, "flags": [1,"", ""]}} ,
-            "cfg": { "Set":itemsflags }, 
-            #"filter":'<span class="__cf_email__".+</script>',#anti email crap 
+            "cfg": { "Set":itemsflags },
+            #"filter":'<span class="__cf_email__".+</script>',#anti email crap
             "flags": cfg}
 
     codeFlag = [1, "http://ragi.al/item/", "/", "\""]
@@ -112,7 +113,7 @@ def getItemHistory(url, rowCount):
     src.doConfig()
     #################################
     #####end of scrape running#######
-    
+
     ##debug##
     #print("debug(getItemHistory):")
     #print(src.output["All0|Data"]["set0|Set"]["row0|Name"].keys())
@@ -120,13 +121,13 @@ def getItemHistory(url, rowCount):
     #eprint(len(src.output["All0|Data"]["set0|Set"].keys()))
     #eprint(len(src.output["All0|Data"]["set0|Set"].keys())/4)
     #return src.output
-    
+
     #OVER RIDE rowcount for the less then max count
     rowCount = int(len(src.output["All0|Data"]["set0|Set"].keys())/4) #name,price,date,src
-    
-    
+
+
     #populate Items
-    item = Item(Seperator, "name", "name" + Seperator + "date" + Seperator + "price" + Seperator + "active")
+    item = newRagialItem()
     data = src.output["All0|Data"]
     iname = ""
     iname = src.output["All0|Name"]
@@ -135,12 +136,12 @@ def getItemHistory(url, rowCount):
     if type(iname)==type(""):
         iname = iname.strip()
     item.itemDetails["name"] = iname
-    
+
     #broke testing
     item.itemDetails["code"] = str(src.output["All0|code"]["code0"])
     #spacer = lambda d: "".join(["_" for a in range(d)])
     #print(spacer(67))
-    
+
     config = getConfig()
     seperator = config.get("CSV", "seperator")
     for r in range(rowCount):
@@ -173,11 +174,11 @@ def getItemHistory(url, rowCount):
     #print("{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date)))
     return item
 
-
-'''checks if a url's history is empty on a page
-returns true if it's empty falst if it is not =
-'''
 def checkHistoryEmpty(url):
+    '''
+    checks if a url's history is empty on a page
+    returns true if it's empty falst if it is not =
+    '''
     allHtml = [1, "<tr class=\"odd\">", ""]
     alls = {"type": "regex", "name": "is Empty",
                 "flags": allHtml, "cfg":{}}
@@ -201,64 +202,15 @@ def checkHistoryEmpty(url):
     data = src.output
     #print("debug(is empty):"+str(-1==data["is Empty0"]))
     return -1 != data["is Empty0"]
-'''
-returns a name icon and code of a given item
-'''
-def findItem(name, page=0, rowCount=16):
-    #gets the configs
-    config = getConfig()
-    Seperator = config.get("CSV", "seperator")
-    urlbase = "http://ragi.al/search/iRO-Renewal/{}/{}"
-    url = urlbase.format(name, page + 1)
-    
-    codeflag = [1, "href=\"", "iRO-Renewal/", "\""]
-    codeflags = {"type": "string", "name": "code", "cfg": {}, "flags": codeflag}
-    nameflag = [1, "<img", ">", "<"]
-    nameflags = {"type": "string", "name": "name", "cfg": {}, "flags": nameflag}
-    iconflag = [1, "<img src=\"", "\""]
-    iconflags = {"type": "string", "name": "icon", "cfg": {}, "flags": iconflag}
-    cfg = [rowCount, "<td class=\"name\">", "/tr>"]
-    cfgs = {"type": "string",
-            "name": "Search",
-            "cfg": {"Code": codeflags, "Name": nameflags, "Icon": iconflags},
-            "flags": cfg,
-            "filter": "[a-zA-Z0-9]+"}
-    src = Scrape(url=url)
-    try:
-        if lan:
-            urlR = "http://ragi.al/search/iRO-Renewal/"
-            code, page = url[len(urlR):].split("/")
-            f = open("search.{}.{}.htm".format(code, page), "r")
-            src.source = f.read()
-            f.close()
-        else:
-            src.getSource()
-    except HTTPError as e:
-        print(e.code)
-    except URLError as e:
-        print("URL error")
-        print(e.reason)
-        return None
-    src.setConfig(cfgs)
-    src.doConfig()
-    item = Item(Seperator, "", "name" + Seperator + "code" + Seperator + "icon")
-    data = src.output
-    for r in range(rowCount):
-        name = data["Search" + str(r) + "|Name"]["name0"]
-        url = str(data["Search" + str(r) + "|code"]["code0"])
-        if url != None:
-            url= url.replace(",", "")
-        else:
-            eprint("Row" + str(r)+ str(data["set0|Set"]["Search" + str(r) + ""]))
-        icon = data["Search" + str(r) + "|Icon"]["icon0"]
-        item.append(name=name.strip(), url=url.strip(), icon=icon.strip())
-    # print("{0:25}|{1:20}|{2:>20}".format(str(name), str(price), str(date)))
-    return item
 
-'''
-finds code for the URLlink given a name.
-'''
-def searchName(name):
+def findItem(name):
+    '''
+    name - name to search for
+    configurations used
+    itemsPerPage - rows on the search page
+    maxpage - max pages to use to search for
+    finds code for the URLlink given a name.
+    '''
     # setup configs
     config = getConfig()
     urlbase = "http://ragi.al/search/iRO-Renewal/{link}/{page}"#swap to format 2  inputs
@@ -306,6 +258,7 @@ def searchName(name):
         for value in retvalues:
             if value["name"] == name:  #test nextpage/page count
                 #print("debug (searchName)name:" + value["name"] + " value:" + value["link"])
+                casheWrite(name, value["link"])
                 return value["link"]
             else:
                 print("not found")
@@ -315,10 +268,51 @@ def searchName(name):
     #return url
     return ""
 
-'''
-Returns the configurations
-'''
+def casheLookup(name):
+    global cashe
+    #eprint(cashe)
+    if cashe is None or cashe == {}:
+        import cashed
+        cashe = cashed.names.cashed.cashe
+        #eprint("cashed loaded...")
+    if name in cashe.keys():
+        #eprint("found: "+cashe[name])
+        return cashe[name]
+        '''look up for cashe names'''
+    return None
+def casheWrite(name, shortName):
+    global cashe
+    cashe[name]=shortName
+    eprint("get name " + name)
+    eprint(cashe)
+    if not os.path.exists("cashed"):
+        os.makedirs("cashed")
+        f = open("cashed"+ os.sep + "__init__.py", "w")
+        eprint("cashed"+ os.sep + "__init__.py")
+        try:
+            f.write("""__author__ = "marcus"
+import cashed.names""")
+        finally:
+            f.close()
+    f = open("cashed" + os.sep + "names" + ".py", "w")
+    try:
+        f.write("""class cashed:
+ cashe = """+str(cashe))
+    finally:
+        f.close()
+
+def searchName(name):
+    ##todo: add cashe names
+    ret = casheLookup(name)
+    if ret is None:
+        ret = findItem(name)
+    return ret
+
+
 def getConfig():
+    '''
+    Returns the configurations
+    '''
     config = ConfigParser.ConfigParser()
     if "EXTERNAL_STORAGE" in os.environ:
         cfg = {"nt": "", "posix": os.environ["EXTERNAL_STORAGE"] + "/com.hipipal.qpyplus/projects/Ragial/", "other": ""}
@@ -330,18 +324,22 @@ def getConfig():
     config.read(cfg[cfgOS] + "settings.ini")
     return config
 
-'''
-returns blank Ragial Item
-'''
+
 def newRagialItem():
+    '''
+    returns blank Ragial Item
+    '''
     config = getConfig()
     seperator = config.get("CSV", "seperator")
     return Item(seperator, "name", "name" + seperator + "date" + seperator + "price" + seperator + "active")
 
-'''
-get's and populates Ragila items
-'''
 def ragialItemPopulation(item, url, rowCount):
+    '''
+    item - running item info
+    url - url to run
+    rowCount - number of rows in history
+    get's and populates Ragila items
+    '''
     i = getItemHistory(str(url), rowCount)
     #print("debug(ragialItemPopulation)"+str(i.itemDetails.keys()))
     if i == None:
@@ -423,7 +421,7 @@ if __name__ == "__main__":
         print(i.itemDetails["code"])
         print(len(i))
         csvOutput(i)
-    
+
     #a = getItemHistory("http://ragi.al/item/iRO-Renewal/zAM/1", 3)
     #print("Debug(main):"+str(a))
     #for info in a:

@@ -48,10 +48,10 @@ def getInputs():
     #Ragial.eprint(file)
     for line in file.split("\n"):
         if len(line)>0:
-            #Ragial.eprint(line[::-1])
-            #revirse look for the first ( incase it's double or tripple digitiet
-            lastindex = (line[::-1].index("( ")+2)*-1#remember it's revirsed
             if line[:8]=="You got ":
+                #Ragial.eprint(line[::-1])
+                #revirse look for the first ( incase it's double or tripple digitiet
+                lastindex = (line[::-1].index("( ")+2)*-1#remember it's revirsed
                 ret[line[8:lastindex]] = 0 #8="You Got "
     Ragial.eprint(ret.keys())
     return ret.keys()
@@ -60,6 +60,7 @@ def getCodes(names):
     ret = {}
     for name in names:
         ret[name] = Ragial.searchName(name)
+        time.sleep(1)#flood control #SECONDS
     return ret
 
 def getHistory(codes):
