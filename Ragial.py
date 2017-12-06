@@ -33,6 +33,8 @@ try:
 except:
     import ConfigParser
 
+##### TODO: alter the code to pull out the hisory make a history class  and write a stright script for first page
+
 lan = False
 Seperator = "|"
 cashe = {} # cashe of names and link short hand
@@ -272,8 +274,13 @@ def casheLookup(name):
     global cashe
     #eprint(cashe)
     if cashe is None or cashe == {}:
-        import cashed
-        cashe = cashed.names.cashed.cashe
+        try:
+            import cashed
+            cashe = cashed.names.cashed.cashe
+        except ModuleNotFoundError:
+            eprint("tracking")
+            cashe = {}
+
         #eprint("cashed loaded...")
     if name in cashe.keys():
         #eprint("found: "+cashe[name])
@@ -284,7 +291,7 @@ def casheWrite(name, shortName):
     global cashe
     cashe[name]=shortName
     eprint("get name " + name)
-    eprint(cashe)
+    #eprint(cashe)
     if not os.path.exists("cashed"):
         os.makedirs("cashed")
         f = open("cashed"+ os.sep + "__init__.py", "w")
